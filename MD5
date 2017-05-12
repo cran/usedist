@@ -1,0 +1,14 @@
+0fe7dad446533818c6dccaa34747e1b3 *DESCRIPTION
+874cea982d7d3d1644f1e74450ab7195 *NAMESPACE
+061c857b82480bbf1351ba1be996a820 *NEWS.md
+322854990197d0231870d422d9e18a59 *R/distance_matrix.R
+03e37e3d26237e3b5f68f37e3d6acd1b *man/dist_between_centroids.Rd
+0573d21a865e19aacb25f64c42841d96 *man/dist_get.Rd
+4163e367e3fb3a03f37b5ef5584ca332 *man/dist_groups.Rd
+3b89be10b15be1fc8b74bb0dd703a4e5 *man/dist_make.Rd
+a2bc3351c78db1720ad530bd98ad265b *man/dist_setNames.Rd
+2dd634da9e4f43e62822dc442795ea5f *man/dist_subset.Rd
+82a0a028887d28288e2280523a426e25 *man/dist_to_centroids.Rd
+04026be9b8f502cd18ce1c46c819a66f *man/usedist.Rd
+0870062a75437fa76697fda1f33ab50b *tests/testthat.R
+32d2f4ba73bce35ad8ee648584a7cd4d *tests/testthat/test_distance_matrix.R
