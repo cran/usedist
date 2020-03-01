@@ -1,11 +1,11 @@
 #' usedist: a package for working with distance matrices in R
 #'
 #' In usedist, we provide a number of functions to help with distance matrix
-#' objects, such as those produced by the \code{dist} function.  Some functions are
-#' geared towards making or altering distance matrix objects.  Others relate to
-#' groups of items in the distance matrix. They provide access to within- or
-#' between-group distances, or use these distances to infer the distance to
-#' group centroids.
+#' objects, such as those produced by the \code{dist} function.  Some functions
+#' are geared towards making or altering distance matrix objects.  Others
+#' relate to groups of items in the distance matrix. They provide access to
+#' within- or between-group distances, or use these distances to infer the
+#' distance to group centroids.
 #'
 #' @docType package
 #' @name usedist
@@ -15,6 +15,7 @@ NULL
 #'
 #' @param d A distance matrix object of class \code{dist}.
 #' @param nm New labels for the rows/columns.
+#' @return A distance matrix with new row/column labels.
 #' @export
 #' @examples
 #' m4 <- matrix(1:16, nrow=4, dimnames=list(LETTERS[1:4]))
@@ -29,11 +30,9 @@ dist_setNames <- function (d, nm) {
 }
 
 #' Retrieve distances from a \code{dist} object.
-#' Check if square
-#' Check if numeric
 #'
 #' @param d A distance matrix object of class \code{dist}.
-#' @param idx1,idx2 Indicies specifying the distances to extract.
+#' @param idx1,idx2 Indices specifying the distances to extract.
 #' @return A vector of distances.
 #' @export
 #' @examples
@@ -67,8 +66,9 @@ dist_get <- function (d, idx1, idx2) {
 
 #' Extract parts of a \code{dist} object.
 #'
-#' This function also works to re-arrange the elements of a distance matrix, if
-#' the indicies are provided in the desired order.
+#' Extract a subset of values from a distance matrix. This function also works
+#' to re-arrange the rows of a distance matrix, if they are provided in the
+#' desired order.
 #'
 #' @param d A distance matrix object of class \code{dist}.
 #' @param idx Indices specifying the subset of distances to extract.
@@ -87,11 +87,12 @@ dist_subset <- function (d, idx) {
 #'
 #' @param d A distance matrix object of class \code{dist}.
 #' @param g A factor representing the groups of objects in \code{d}.
-#' @return A data frame with 6 columns. "Item1" and "Item2" identify the
-#'   items compared, using the label if available. Likewise, "Group1" and
-#'   "Group2" identify the groups of the items. "Label" is a factor giving a
-#'   convenient label for the type of comparison. Finally, "Distance" contains
-#'   the distance of interest.
+#' @return A data frame with 6 columns:
+#' \describe{
+#'   \item{Item1, Item2}{The items being compared.}
+#'   \item{Group1, Group2}{The groups to which the items belong.}
+#'   \item{Label}{A convenient label for plotting or comparison.}
+#'   \item{Distance}{The distance between Item1 and Item2.}}
 #' @export
 #' @examples
 #' m4 <- matrix(1:16, nrow=4, dimnames=list(LETTERS[1:4]))
@@ -123,33 +124,36 @@ dist_groups <- function(d, g) {
     Item2 = if (is.null(dlabels)) idx2 else dlabels[idx2],
     Group1 = g[idx1],
     Group2 = g[idx2],
-    Label = ifelse(
+    Label = factor(ifelse(
       level1 == level2,
       paste("Within", level1),
-      paste("Between", level1, "and", level2)),
-    Distance = dist_get(d, idx1, idx2))
+      paste("Between", level1, "and", level2))),
+    Distance = dist_get(d, idx1, idx2),
+    stringsAsFactors = FALSE)
 }
 
 #' Make a distance matrix using a custom distance function
 #'
 #' @param x A matrix of observations, one per row
-#' @param distance_fcn A function of two arguments, used to compute the
-#'   distance between two rows of the data matrix.
-#' @param method Name for the distance method.  If provided, will be stored in
-#'   the \code{method} attribute of the result.
+#' @param distance_fcn A function used to compute the distance between two
+#'   rows of the data matrix.  The two rows will be passed as the first and
+#'   second arguments to \code{distance_fcn}.
+#' @param ... Additional arguments passed to \code{distance_fcn}.
 #' @return A \code{dist} object containing the distances between rows of the
 #'   data matrix.
+#' @details We do not set the \code{call} or \code{method} attributes of the
+#'   \code{dist} object.
 #' @export
 #' @examples
 #' x <- matrix(sin(1:30), nrow=5)
 #' rownames(x) <- LETTERS[1:5]
 #' manhattan_distance <- function (v1, v2) sum(abs(v1 - v2))
-#' dist_make(x, manhattan_distance, "Manhattan (custom)")
-dist_make <- function (x, distance_fcn, method=NULL) {
+#' dist_make(x, manhattan_distance)
+dist_make <- function (x, distance_fcn, ...) {
   distance_from_idxs <- function (idxs) {
     i1 <- idxs[1]
     i2 <- idxs[2]
-    distance_fcn(x[i1,], x[i2,])
+    distance_fcn(x[i1,], x[i2,], ...)
   }
   size <- nrow(x)
   d <- apply(utils::combn(size, 2), 2, distance_from_idxs)
@@ -160,9 +164,6 @@ dist_make <- function (x, distance_fcn, method=NULL) {
   }
   attr(d, "Diag") <- FALSE
   attr(d, "Upper") <- FALSE
-  if (!is.null(method)) {
-    attr(d, "method") <- method
-  }
   class(d) <- "dist"
   d
 }
